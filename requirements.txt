@@ -1,0 +1,104 @@
+# ==========================
+# FastAPI
+# ==========================
+fastapi
+uvicorn[standard]
+python-multipart
+
+# ==========================
+# LangChain & LangGraph
+# ==========================
+langchain
+langgraph
+langchain-core
+langchain-community
+
+# ==========================
+# LLM (Choose one)
+# ==========================
+langchain-ollama
+# OR
+# langchain-openai
+# OR
+# langchain-google-genai
+
+# ==========================
+# Database
+# ==========================
+sqlalchemy
+alembic
+
+# ==========================
+# Authentication
+# ==========================
+python-jose[cryptography]
+passlib[bcrypt]
+
+# ==========================
+# Environment Variables
+# ==========================
+python-dotenv
+
+# ==========================
+# Data Validation
+# ==========================
+pydantic
+pydantic-settings
+
+# ==========================
+# Vector Database
+# ==========================
+chromadb
+
+# ==========================
+# Embeddings
+# ==========================
+sentence-transformers
+
+# ==========================
+# Static Code Analysis
+# ==========================
+ruff
+bandit
+radon
+sqlfluff
+semgrep
+
+# ==========================
+# Utilities
+# ==========================
+orjson
+rich
+httpx
+tenacity
+typing-extensions
+
+# ==========================
+# Testing
+# ==========================
+pytest
+pytest-asyncio
+
+# PostgreSQL (if you move away from SQLite)
+psycopg2-binary
+
+# MySQL
+pymysql
+
+# Redis
+redis
+
+# Background Tasks
+celery
+
+# AI Observability
+langsmith
+
+# Logging
+loguru
+
+# Rate Limiting
+slowapi
+
+# Docker Environment
+gunicorn
