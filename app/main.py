@@ -1,27 +1,19 @@
 from fastapi import FastAPI
-from llm.factory import get_model
-from tools.dectecor import detect_language
 
-app = FastAPI(title="AI Code Reviewer")
+from app.database import create_tables
+from app.login import router as login_router
 
-model = get_model()
+# Create tables when application starts
+create_tables()
 
+app = FastAPI(
+    title="Code Review API",
+    version="1.0.0"
+)
 
-@app.get("/get_first_review")
-def get_first_review():
-    response = model.invoke("Hello, how are you?")
-    return {"message": response.content}
-
-
-
-@app.post("/review")
-def review_code(code: str):
-    """Review the given code snippet."""
-    return {"review": detect_language(code)}
+app.include_router(login_router)
 
 
-
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+@app.get("/")
+def home():
+    return {"message": "Code Review API Running"}

@@ -1,5 +1,5 @@
 # pyrefly: ignore [missing-import]
-from langchain_mistralai import ChatMistralAI
+from factory import get_model
 from langchain.tools import tool
 from langchain_core.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
@@ -9,7 +9,7 @@ from rich import print
 
 load_dotenv()
 
-model = ChatMistralAI(model="mistral-large-latest")
+model = get_model()
 
 
 # ---- Schema ----
@@ -72,7 +72,6 @@ def analyze_code(code: str) -> str:
             out.append(f"  {i}. {s}")
 
     return "\n".join(out)
-
-
-
-print(analyze_code.invoke({"code": "select * from users"}))
+    
+    
+    
