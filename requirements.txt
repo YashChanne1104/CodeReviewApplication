@@ -55,6 +55,7 @@ chromadb
 # ==========================
 sentence-transformers
 
+
 # ==========================
 # Static Code Analysis
 # ==========================
