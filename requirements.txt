@@ -73,7 +73,7 @@ rich
 httpx
 tenacity
 typing-extensions
-
+langchain_mistralai
 # ==========================
 # Testing
 # ==========================
