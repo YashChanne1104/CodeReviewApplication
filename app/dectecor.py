@@ -1,77 +1,129 @@
-# pyrefly: ignore [missing-import]
-from factory import get_model
-from langchain.tools import tool
-from langchain_core.prompts import ChatPromptTemplate
-from dotenv import load_dotenv
-from pydantic import BaseModel, Field
 from typing import Literal
-from rich import print
 
+from dotenv import load_dotenv
+from fastapi import APIRouter
+from langchain_core.prompts import ChatPromptTemplate
+# pyrefly: ignore [missing-import]
+from langchain_mistralai import ChatMistralAI
+from pydantic import BaseModel, Field
+
+# Load environment variables
 load_dotenv()
 
-model = get_model()
+router = APIRouter(tags=["Code Review"])
+
+# Initialize Mistral model
+model = ChatMistralAI(
+    model="mistral-large-latest",
+    temperature=0
+)
 
 
-# ---- Schema ----
+# ===========================
+# Request Model
+# ===========================
+
+class CodeRequest(BaseModel):
+    code: str = Field(..., description="Source code to analyze")
+
+
+# ===========================
+# Response Models
+# ===========================
 
 class Issue(BaseModel):
     summary: str = Field(description="Short summary of the issue")
-    severity: Literal["low", "medium", "high"] = Field(description="Severity of the issue")
-    suggestion: str = Field(description="Suggested fix for this specific issue")
+    severity: Literal["low", "medium", "high"] = Field(
+        description="Severity level"
+    )
+    suggestion: str = Field(description="Recommended fix")
 
 
 class CodeReport(BaseModel):
-    language: str = Field(description="Detected programming language of the code")
-    is_clean: bool = Field(description="True if no issues were found at all")
-    review: str = Field(description="A concise overall review/summary of the code quality")
-    issues: list[Issue] = Field(default_factory=list, description="List of issues found, empty if clean")
+    language: str = Field(description="Detected programming language")
+    is_clean: bool = Field(description="Whether the code is clean")
+    review: str = Field(description="Overall review")
+
+    issues: list[Issue] = Field(
+        default_factory=list,
+        description="Issues found"
+    )
+
     top_suggestions: list[str] = Field(
         default_factory=list,
-        description="Top 3 actionable suggestions to improve the code, regardless of severity"
+        description="Top improvements"
     )
 
 
+# Structured Output
 structured_model = model.with_structured_output(CodeReport)
 
 
-# ---- Tool ----
+# ===========================
+# API Endpoint
+# ===========================
 
-@tool
-def analyze_code(code: str) -> str:
-    """Analyze a code snippet: detect language, review quality, find issues, and give suggestions."""
+@router.post(
+    "/analyze-code",
+    response_model=CodeReport,
+    summary="Analyze Source Code"
+)
+def analyze_code(request: CodeRequest):
+
     prompt = ChatPromptTemplate.from_template(
-        "You are a senior code reviewer. Analyze the following code snippet.\n"
-        "1. Detect the programming language.\n"
-        "2. Give a concise overall review of the code quality.\n"
-        "3. List any issues (bugs, performance, readability, best practices) with severity and a fix.\n"
-        "4. Give the top 3 most actionable suggestions overall.\n"
-        "If the code has no issues, set is_clean to true and leave issues empty.\n\n"
-        "Code:\n{code}"
+        """
+        You are a Senior Software Engineer and Code Reviewer.
+        
+        Analyze the given source code.
+        
+        Return ONLY the structured response.
+        
+        Tasks:
+        
+        1. Detect the programming language.
+        2. Review the overall code quality.
+        3. Find bugs.
+        4. Find performance issues.
+        5. Find security issues.
+        6. Find readability issues.
+        7. Suggest improvements.
+        
+        If there are no issues:
+        
+        - is_clean = true
+        - issues = []
+        
+        Otherwise:
+        
+        - is_clean = false
+        
+        Code:
+        
+        {code}
+        """
     )
-    formatted = prompt.format_messages(code=code)
-    report: CodeReport = structured_model.invoke(formatted)
 
-    out = [
-        f"Language: {report.language}",
-        f"Review: {report.review}",
-        "",
-    ]
+    messages = prompt.format_messages(code=request.code)
 
-    if report.is_clean:
-        out.append("No issues found. Code looks good.")
-    else:
-        out.append("Issues:")
-        for issue in report.issues:
-            out.append(f"  [{issue.severity.upper()}] {issue.summary}")
-            out.append(f"    → {issue.suggestion}")
+    report: CodeReport = structured_model.invoke(messages)
 
-    if report.top_suggestions:
-        out.append("")
-        out.append("Top Suggestions:")
-        for i, s in enumerate(report.top_suggestions, 1):
-            out.append(f"  {i}. {s}")
+    return report
 
-    return "\n".join(out)
-    
-    
-    
+def run_code_analysis(code: str) -> CodeReport:
+    prompt = ChatPromptTemplate.from_template(
+        """
+        You are a Senior Software Engineer and Code Reviewer.
+        Analyze the given source code.
+        Return ONLY the structured response.
+        ...
+        Code:
+        {code}
+        """
+    )
+    messages = prompt.format_messages(code=code)
+    return structured_model.invoke(messages)
+
+
+@router.post("/analyze-code", response_model=CodeReport, summary="Analyze Source Code")
+def analyze_code(request: CodeRequest):
+    return run_code_analysis(request.code)
