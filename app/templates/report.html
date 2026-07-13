@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Report #{{ review.id }} — ReviewAgent{% endblock %}
+
+{% block content %}
+<section class="report">
+    <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+
+    <div class="panel">
+        <div class="report-header">
+            <div>
+                <h1>Code Review Report</h1>
+                <p class="text-muted">{{ review.created_at.strftime("%B %d, %Y at %H:%M") }}</p>
+            </div>
+            <div class="report-badges">
+                <span class="lang-badge">{{ review.language_type }}</span>
+                {% if review.is_clean %}
+                <span class="status-badge status-clean">✓ Clean</span>
+                {% else %}
+                <span class="status-badge status-issues">⚠ Issues Found</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="report-section">
+            <h3>Overall Review</h3>
+            <p>{{ review.review_summary }}</p>
+        </div>
+
+        {% if review.top_suggestions %}
+        <div class="report-section">
+            <h3>Top Suggestions</h3>
+            <ul class="suggestion-list">
+                {% for s in review.top_suggestions %}
+                <li>{{ s }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if review.issues %}
+        <div class="report-section">
+            <h3>Issues ({{ review.issues|length }})</h3>
+            <div class="issue-list">
+                {% for issue in review.issues %}
+                <div class="issue-item severity-{{ issue.severity }}">
+                    <div class="issue-head">
+                        <span class="severity-dot"></span>
+                        <strong>{{ issue.summary }}</strong>
+                        <span class="severity-label">{{ issue.severity }}</span>
+                    </div>
+                    <p class="issue-suggestion">{{ issue.suggestion }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="report-section">
+            <h3>Source Code</h3>
+            <pre class="code-block"><code>{{ review.code_snippet }}</code></pre>
+        </div>
+    </div>
+</section>
+{% endblock %}

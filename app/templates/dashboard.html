@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — ReviewAgent{% endblock %}
+
+{% block content %}
+<div id="loading-overlay" class="loading-overlay">
+    <div class="loading-box">
+        <div class="spinner"></div>
+        <p>Analyzing your code...</p>
+    </div>
+</div>
+<section class="dashboard">
+    <div class="dashboard-header">
+        <h1>Welcome, {{ user.username }}</h1>
+        <p class="text-muted">Paste your code below to get an instant AI review</p>
+    </div>
+
+    <div class="dashboard-grid">
+
+        <div class="panel">
+            <h2 class="panel-title">Submit Code</h2>
+            <form method="post" action="/dashboard/review"
+                onsubmit="document.getElementById('loading-overlay').style.display='flex'">
+                <div class="form-group">
+                    <textarea name="code" class="code-input" rows="14" placeholder="Paste your code here..."
+                        required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full btn-large">Analyze Code</button>
+            </form>
+        </div>
+
+        <div class="panel">
+            <h2 class="panel-title">Latest Result</h2>
+
+            {% if result %}
+            <div class="result-card">
+                <div class="result-top">
+                    <span class="lang-badge">{{ result.language_type }}</span>
+                    {% if result.is_clean %}
+                    <span class="status-badge status-clean">✓ Clean</span>
+                    {% else %}
+                    <span class="status-badge status-issues">⚠ Issues Found</span>
+                    {% endif %}
+                </div>
+
+                <p class="result-summary">{{ result.review_summary }}</p>
+
+                {% if result.issues %}
+                <div class="issue-list">
+                    {% for issue in result.issues %}
+                    <div class="issue-item severity-{{ issue.severity }}">
+                        <div class="issue-head">
+                            <span class="severity-dot"></span>
+                            <strong>{{ issue.summary }}</strong>
+                            <span class="severity-label">{{ issue.severity }}</span>
+                        </div>
+                        <p class="issue-suggestion">{{ issue.suggestion }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <a href="/report/{{ result.id }}" class="btn btn-ghost btn-full">View Full Report</a>
+            </div>
+            {% else %}
+            <p class="empty-state">Submit code on the left to see your review here.</p>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <div class="panel history-panel">
+        <h2 class="panel-title">Review History</h2>
+
+        {% if reviews %}
+        <div class="history-list">
+            {% for r in reviews %}
+            <a href="/report/{{ r.id }}" class="history-item">
+                <div class="history-left">
+                    <span class="lang-badge lang-badge-sm">{{ r.language_type }}</span>
+                    <span class="history-summary">{{ r.review_summary[:80] }}{% if r.review_summary|length > 80 %}...{%
+                        endif %}</span>
+                </div>
+                <div class="history-right">
+                    {% if r.is_clean %}
+                    <span class="status-dot status-dot-clean"></span>
+                    {% else %}
+                    <span class="status-dot status-dot-issues"></span>
+                    {% endif %}
+                    <span class="history-date">{{ r.created_at.strftime("%b %d, %Y %H:%M") }}</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="empty-state">No reviews yet. Submit your first piece of code above.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
