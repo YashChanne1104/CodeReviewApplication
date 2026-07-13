@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}ReviewAgent — AI Code Review{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-badge">✦ Powered by Mistral AI</div>
+    <h1>Ship cleaner code,<br>every single time.</h1>
+    <p class="hero-subtitle">
+        Paste your code and get an instant senior-engineer-level review —
+        bugs, performance issues, security gaps, and style suggestions in seconds.
+    </p>
+    <div class="hero-buttons">
+        <a href="/signup" class="btn btn-primary btn-large">Get Started Free</a>
+        <a href="/login" class="btn btn-ghost btn-large">Login</a>
+    </div>
+</section>
+
+<section class="features">
+    <div class="feature-card">
+        <div class="feature-icon">🐞</div>
+        <h3>Bug Detection</h3>
+        <p>Catches logic errors and edge cases before they hit production.</p>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Performance</h3>
+        <p>Flags inefficient queries, loops, and unnecessary complexity.</p>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>Security</h3>
+        <p>Highlights injection risks, unsafe patterns, and missing checks.</p>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">📚</div>
+        <h3>History</h3>
+        <p>Every review is saved to your account, searchable anytime.</p>
+    </div>
+</section>
+{% endblock %}

@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Form
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
 
 from app.database import get_db
 from app.models import User
@@ -9,53 +9,63 @@ from app.auth import hash_password, verify_password, create_access_token
 router = APIRouter(tags=["login and signup"])
 
 
-class SignupRequest(BaseModel):
-    username: str
-    email: str
-    password: str
-
-
-class LoginRequest(BaseModel):
-    username: str
-    password: str
-
-
 @router.post("/signup")
-def signup(data: SignupRequest, db: Session = Depends(get_db)):
+def signup(
+    username: str = Form(...),
+    email: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db)
+):
     existing_user = (
         db.query(User)
-        .filter((User.username == data.username) | (User.email == data.email))
+        .filter((User.username == username) | (User.email == email))
         .first()
     )
+
     if existing_user:
-        raise HTTPException(status_code=400, detail="Username or Email already exists")
+        return RedirectResponse(
+            url="/signup?error=Username or Email already exists",
+            status_code=303
+        )
 
     new_user = User(
-        username=data.username,
-        email=data.email,
-        password_hash=hash_password(data.password),
+        username=username,
+        email=email,
+        password_hash=hash_password(password)
     )
+
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
 
-    return {"message": "Signup successful", "username": new_user.username}
+    return RedirectResponse(url="/login", status_code=303)
 
 
 @router.post("/login")
-def login(data: LoginRequest, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == data.username).first()
+def login(
+    username: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(User.username == username).first()
 
-    if user is None or not verify_password(data.password, user.password_hash):
-        raise HTTPException(status_code=401, detail="Invalid username or password")
+    if user is None or not verify_password(password, user.password_hash):
+        return RedirectResponse(
+            url="/login?error=Invalid username or password",
+            status_code=303
+        )
 
     access_token = create_access_token(data={"sub": str(user.id)})
 
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "username": user.username,
-    }
+    response = RedirectResponse(url="/dashboard", status_code=303)
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,     # JS can't read it — safer against XSS
+        max_age=60 * 60 * 24,   # 1 day, matches token expiry
+        samesite="lax",
+    )
+    return response
 
 
 @router.get("/users")

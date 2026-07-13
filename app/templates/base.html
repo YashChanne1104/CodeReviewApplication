@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ReviewAgent{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="brand">
+            <span class="brand-icon">◆</span> ReviewAgent
+        </a>
+        <div class="nav-links">
+            {% if user %}
+            <a href="/dashboard">Dashboard</a>
+            <span class="nav-user">{{ user.username }}</span>
+            <a href="/logout" class="btn btn-ghost btn-small">Logout</a>
+            {% else %}
+            <a href="/login">Login</a>
+            <a href="/signup" class="btn btn-primary btn-small">Sign Up</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>ReviewAgent &middot; AI-powered code review, built on FastAPI + Mistral</p>
+    </footer>
+
+</body>
+
+</html>
