@@ -27,9 +27,8 @@ passlib[bcrypt]
 # Environment Variables
 # ==========================
 python-dotenv
-
+psycopg2-binary
 # ==========================
 # Data Validation
 # ==========================
 pydantic
-psycopg2-binary

@@ -11,7 +11,6 @@ from app.models import User
 SECRET_KEY = os.getenv("SECRET_KEY", "fallback-dev-key-change-me")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 2   # 1 day
-
 bearer_scheme = HTTPBearer()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
