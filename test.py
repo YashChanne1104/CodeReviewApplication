@@ -1,5 +1,3 @@
-import sqlite3
-conn = sqlite3.connect("users.db")
-cur = conn.cursor()
-print(cur.execute("SELECT * FROM reviews").fetchall())
+from app.email_service import send_otp_email
+send_otp_email("logicgame004@gmail.com", "123456")
 

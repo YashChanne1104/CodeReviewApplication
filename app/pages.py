@@ -2,7 +2,8 @@ from fastapi import APIRouter, Request, Depends, Form
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
-
+from app.otp import generate_and_send_otp, verify_otp
+from app.auth import hash_password
 from app.database import get_db
 from app.models import User, Review
 from app.auth import get_current_user_from_request
@@ -105,3 +106,55 @@ def report_page(review_id: int, request: Request, db: Session = Depends(get_db))
         return RedirectResponse(url="/dashboard", status_code=303)
 
     return templates.TemplateResponse(request, "report.html", {"user": user, "review": review})
+
+    
+
+@router.get("/forgot-password")
+def forgot_password_page(request: Request, error: str = None):
+    return templates.TemplateResponse(request, "forgot_password.html", {"error": error, "user": None})
+
+
+@router.post("/forgot-password")
+def forgot_password_submit(request: Request, email: str = Form(...), db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == email).first()
+
+    if not user:
+        return RedirectResponse(url="/forgot-password?error=No account found with this email", status_code=303)
+
+    sent = generate_and_send_otp(user, db)
+    if not sent:
+        return RedirectResponse(url="/forgot-password?error=Failed to send email. Try again.", status_code=303)
+
+    return RedirectResponse(url=f"/verify-otp?user_id={user.id}", status_code=303)
+
+
+@router.get("/verify-otp")
+def verify_otp_page(request: Request, user_id: int, error: str = None):
+    return templates.TemplateResponse(request, "verify_otp.html", {"error": error, "user_id": user_id, "user": None})
+
+
+@router.post("/verify-otp")
+def verify_otp_submit(request: Request, user_id: int = Form(...), code: str = Form(...), db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user or not verify_otp(user, code, db):
+        return RedirectResponse(url=f"/verify-otp?user_id={user_id}&error=Invalid or expired code", status_code=303)
+
+    return RedirectResponse(url=f"/reset-password?user_id={user.id}", status_code=303)
+
+
+@router.get("/reset-password")
+def reset_password_page(request: Request, user_id: int, error: str = None):
+    return templates.TemplateResponse(request, "reset_password.html", {"error": error, "user_id": user_id, "user": None})
+
+
+@router.post("/reset-password")
+def reset_password_submit(request: Request, user_id: int = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        return RedirectResponse(url="/login?error=Something went wrong", status_code=303)
+
+    user.password_hash = hash_password(password)
+    db.commit()
+
+    return RedirectResponse(url="/login?error=Password reset successful. Please log in.", status_code=303)
