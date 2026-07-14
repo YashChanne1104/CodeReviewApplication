@@ -4,11 +4,11 @@ from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
-
+import os
 from app.database import get_db
 from app.models import User
 
-SECRET_KEY = "8518186d-sfadf4d68f41a-68d4f1a634d1-ad1a64ad8fa"
+SECRET_KEY = os.getenv("SECRET_KEY", "fallback-dev-key-change-me")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 2   # 1 day
 
