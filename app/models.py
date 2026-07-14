@@ -15,6 +15,17 @@ class User(Base):
     reviews = relationship("Review", back_populates="user", cascade="all, delete-orphan")
 
 
+class OTP(Base):
+    __tablename__ = "otps"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    code = Column(String(6), nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+    is_used = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
 class Review(Base):
     __tablename__ = "reviews"
 
