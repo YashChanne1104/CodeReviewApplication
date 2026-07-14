@@ -4,29 +4,18 @@
 fastapi
 uvicorn[standard]
 python-multipart
+jinja2
 
 # ==========================
-# LangChain & LangGraph
+# LangChain (Mistral only)
 # ==========================
-langchain
-langgraph
 langchain-core
-langchain-community
-
-# ==========================
-# LLM (Choose one)
-# ==========================
-langchain-ollama
-# OR
-# langchain-openai
-# OR
-# langchain-google-genai
+langchain-mistralai
 
 # ==========================
 # Database
 # ==========================
 sqlalchemy
-alembic
 
 # ==========================
 # Authentication
@@ -43,63 +32,4 @@ python-dotenv
 # Data Validation
 # ==========================
 pydantic
-pydantic-settings
-
-# ==========================
-# Vector Database
-# ==========================
-chromadb
-
-# ==========================
-# Embeddings
-# ==========================
-sentence-transformers
-
-
-# ==========================
-# Static Code Analysis
-# ==========================
-ruff
-bandit
-radon
-sqlfluff
-semgrep
-
-# ==========================
-# Utilities
-# ==========================
-orjson
-rich
-httpx
-tenacity
-typing-extensions
-langchain_mistralai
-# ==========================
-# Testing
-# ==========================
-pytest
-pytest-asyncio
-
-# PostgreSQL (if you move away from SQLite)
 psycopg2-binary
-
-# MySQL
-pymysql
-
-# Redis
-redis
-
-# Background Tasks
-celery
-
-# AI Observability
-langsmith
-
-# Logging
-loguru
-
-# Rate Limiting
-slowapi
-
-# Docker Environment
-gunicorn
