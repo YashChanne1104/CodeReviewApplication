@@ -1,3 +1,3 @@
 from app.email_service import send_otp_email
-send_otp_email("logicgame004@gmail.com", "123456")
-
+result = send_otp_email("[EMAIL_ADDRESS]", "123456")
+print(result)
